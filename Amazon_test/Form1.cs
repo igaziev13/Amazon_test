@@ -28,71 +28,70 @@ namespace Amazon_test
 
         }
 
-        static string[] GetExcelSheetNames(string connectionString)
+        private static string[] GetExcelSheetNames(string oleConnectionString)
         {
-            OleDbConnection con = new OleDbConnection(connectionString);
-            con.Open();
-            DataTable dt = con.GetOleDbSchemaTable(OleDbSchemaGuid.Tables, null);
-
-
-            if (dt == null)
+            using (OleDbConnection oleConnection = new OleDbConnection(oleConnectionString))
             {
-                return null;
+                oleConnection.Open();
+                DataTable dataTable = oleConnection.GetOleDbSchemaTable(OleDbSchemaGuid.Tables, null);
+
+                if (dataTable == null)
+                {
+                    return null;
+                }
+                else
+                {
+                    String[] excelSheetNames = new String[dataTable.Rows.Count];
+                    int i = 0;
+
+                    foreach (DataRow dataRow in dataTable.Rows)
+                    {
+                        excelSheetNames[i] = dataRow["TABLE_NAME"].ToString();
+                        i++;
+                    }
+                    dataTable.Dispose();
+                    return excelSheetNames;
+                }
             }
-
-            String[] excelSheetNames = new String[dt.Rows.Count];
-            int i = 0;
-
-            foreach (DataRow row in dt.Rows)
-            {
-                excelSheetNames[i] = row["TABLE_NAME"].ToString();
-                i++;
-            }
-
-            return excelSheetNames;
         }
 
         private void btnImportExcel_Click(object sender, EventArgs e)
         {
             if (openFileDialog1.ShowDialog() == DialogResult.OK)
             {
-                SqlBulkCopy oSqlBulk = null;
+                //SQL connection preparation
+                SqlConnection sqlConnection = new SqlConnection(Properties.Settings.Default.sqlConnectionString);
 
-                //Estebilish connection with Excel file
-                string excelFile = openFileDialog1.FileName;
-                string excelConnectionString = "Provider=Microsoft.ACE.OLEDB.12.0;Data Source='" + excelFile + "';Extended Properties=\"Excel 12.0;HDR=YES;\"";              
-                OleDbConnection myExcelConn = new OleDbConnection(excelConnectionString);
-                
+                //OLE connection and data reading preparation
+                string excelConnectionString = "Provider=Microsoft.ACE.OLEDB.12.0;Data Source='" + openFileDialog1.FileName + "';Extended Properties=\"Excel 12.0;HDR=YES;\"";
+                string oleQueryString = string.Format("SELECT * FROM [{0}]", GetExcelSheetNames(excelConnectionString)[0]); //Setting the first Excel sheet as source of data
+                OleDbDataReader oleDbData = null;
+                OleDbConnection oleConnection = new OleDbConnection(excelConnectionString);
+                OleDbCommand oleDbCommand = new OleDbCommand(oleQueryString, oleConnection);
+
                 try
-                {
-                    string query = string.Format("SELECT * FROM [{0}]", GetExcelSheetNames(excelConnectionString)[0]); //Setting the first Excel sheet as source of data
-                    myExcelConn.Open();
+                {   //SQL connection
+                    sqlConnection.Open();
 
-                    //Retrieve data from Excel file
-                    OleDbCommand objOleDB = new OleDbCommand(query, myExcelConn);
+                    //OLE connection and data reading
+                    oleConnection.Open();
+                    oleDbData = oleDbCommand.ExecuteReader();
 
-                    //Read data from Excel file
-                    OleDbDataReader objBulkReader = objOleDB.ExecuteReader();
-
-                    //Estabilish connection with SQL Server
-                    string sqlConnectionString = Properties.Settings.Default.sqlConnectionString;
-                    
-                    using (SqlConnection con = new SqlConnection(sqlConnectionString))
+                    //Load data into SQL Server table                        
+                    using (SqlBulkCopy sqlBulk = new SqlBulkCopy(sqlConnection))
                     {
-                        con.Open();
+                        sqlBulk.DestinationTableName = "Products";
 
-                        //Load data into SQL Server table                        
-                        oSqlBulk = new SqlBulkCopy(con);
+                        //Mapping database table columns with Excel table columns
+                        sqlBulk.ColumnMappings.Add("Артикул", "Article");
+                        sqlBulk.ColumnMappings.Add("[Наименование товара]", "Name");
+                        sqlBulk.ColumnMappings.Add("Цена", "Price");
+                        sqlBulk.ColumnMappings.Add("Количество", "Quantity");
 
-                        oSqlBulk.DestinationTableName = "Products";
-                        //Mapping table column
-                        oSqlBulk.ColumnMappings.Add("Артикул", "Article");
-                        oSqlBulk.ColumnMappings.Add("[Наименование товара]", "Name");
-                        oSqlBulk.ColumnMappings.Add("Цена", "Price");
-                        oSqlBulk.ColumnMappings.Add("Количество", "Quantity");
-                    
-                        oSqlBulk.WriteToServer(objBulkReader);
+                        //Write data from Excel file to the server database
+                        sqlBulk.WriteToServer(oleDbData);
                     }
+
                     //Update DataGridView
                     this.productsTableAdapter.Fill(this.myDataSet.Products);
                     MessageBox.Show("The Excel file data has been uploaded to the server.", "Import Completed", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -103,17 +102,18 @@ namespace Amazon_test
                 }
                 finally
                 {
-                    if (oSqlBulk != null) oSqlBulk.Close();
-                    myExcelConn.Close();
+                    sqlConnection.Close();
+                    oleDbData.Close();
+                    oleConnection.Close();
+                    oleDbCommand.Dispose();
                 }
             }
         }
         
         private void dataGridView1_RowHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
         {
-            //Extract item ID based on selected row
-            DataGridViewRow row = dataGridView1.SelectedRows[0];
-            itemID = row.Cells[0].Value.ToString();
+            //Extract item ID based on selected row            
+            itemID = dataGridView1.SelectedRows[0].Cells[0].Value.ToString();
 
             //Enable the buttons only when some row is selected
             btnEdit.Enabled = true;
@@ -137,27 +137,43 @@ namespace Amazon_test
 
         private void btnDelete_Click(object sender, EventArgs e)
         {
-            SqlConnection con = new SqlConnection(Properties.Settings.Default.sqlConnectionString);
-            try
+            string selectedProductName = dataGridView1.SelectedRows[0].Cells[2].Value.ToString();            
+            if (DialogResult.Yes == MessageBox.Show("The product '" + selectedProductName + "' will be deleted. Are you sure?", "Please confirm", MessageBoxButtons.YesNo, MessageBoxIcon.Question))
             {
-                con.Open();
-                string SqlSelectQuery = "DELETE FROM Products WHERE ID =" + itemID;
-                SqlCommand cmd = new SqlCommand(SqlSelectQuery, con);
-                cmd.ExecuteNonQuery();
-                con.Close();
-                this.productsTableAdapter.Fill(this.myDataSet.Products);
-            }
+                string sqlQueryString = "DELETE FROM Products WHERE ID=@id";
+                SqlConnection sqlConnection = new SqlConnection(Properties.Settings.Default.sqlConnectionString);
 
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-            finally
-            {
-                //Turn off buttons
-                btnDelete.Enabled = false;
-                btnEdit.Enabled = false;
-                itemID = null;
+                //Forming an SQL command with parameters
+                SqlCommand sqlCommand = new SqlCommand(sqlQueryString, sqlConnection);
+                sqlCommand.Parameters.Add("@id", SqlDbType.Int);
+                sqlCommand.Parameters["@id"].Value = Int32.Parse(itemID);
+
+                try
+                {
+                    sqlConnection.Open();
+                    if (sqlCommand.ExecuteNonQuery() > 0)
+                    {
+                        MessageBox.Show("The product has been successfully deleted from database.", "Successful Deleted", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        this.productsTableAdapter.Fill(this.myDataSet.Products);
+                    }
+                    else
+                    {
+                        MessageBox.Show("The product has NOT been successfully deleted.", "Not successful Operation", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                finally
+                {
+                    //Turn off buttons
+                    btnDelete.Enabled = false;
+                    btnEdit.Enabled = false;
+                    sqlConnection.Close();
+                    sqlCommand.Dispose();
+                    itemID = null;
+                }
             }
         }
 

@@ -47,9 +47,11 @@
             // 
             // pictureBox1
             // 
+            this.pictureBox1.ErrorImage = global::Amazon_test.Properties.Resources.NA;
             this.pictureBox1.Location = new System.Drawing.Point(1, 1);
+            this.pictureBox1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(270, 248);
+            this.pictureBox1.Size = new System.Drawing.Size(360, 305);
             this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.pictureBox1.TabIndex = 0;
             this.pictureBox1.TabStop = false;
@@ -57,72 +59,79 @@
             // articleLable
             // 
             this.articleLable.AutoSize = true;
-            this.articleLable.Location = new System.Drawing.Point(277, 16);
+            this.articleLable.Location = new System.Drawing.Point(369, 20);
+            this.articleLable.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.articleLable.Name = "articleLable";
-            this.articleLable.Size = new System.Drawing.Size(36, 13);
+            this.articleLable.Size = new System.Drawing.Size(44, 16);
             this.articleLable.TabIndex = 1;
             this.articleLable.Text = "Article";
             // 
             // articleBox
             // 
-            this.articleBox.Location = new System.Drawing.Point(329, 12);
+            this.articleBox.Location = new System.Drawing.Point(439, 15);
+            this.articleBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.articleBox.MaxLength = 50;
             this.articleBox.Name = "articleBox";
-            this.articleBox.Size = new System.Drawing.Size(120, 20);
+            this.articleBox.Size = new System.Drawing.Size(159, 22);
             this.articleBox.TabIndex = 2;
             this.articleBox.TextChanged += new System.EventHandler(this.articleBox_TextChanged);
             // 
             // nameBox
             // 
-            this.nameBox.Location = new System.Drawing.Point(329, 38);
+            this.nameBox.Location = new System.Drawing.Point(439, 47);
+            this.nameBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.nameBox.MaxLength = 250;
             this.nameBox.Name = "nameBox";
-            this.nameBox.Size = new System.Drawing.Size(120, 20);
+            this.nameBox.Size = new System.Drawing.Size(159, 22);
             this.nameBox.TabIndex = 4;
             // 
             // nameLable
             // 
             this.nameLable.AutoSize = true;
-            this.nameLable.Location = new System.Drawing.Point(277, 42);
+            this.nameLable.Location = new System.Drawing.Point(369, 52);
+            this.nameLable.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.nameLable.Name = "nameLable";
-            this.nameLable.Size = new System.Drawing.Size(35, 13);
+            this.nameLable.Size = new System.Drawing.Size(44, 16);
             this.nameLable.TabIndex = 3;
             this.nameLable.Text = "Name";
             // 
             // priceLabel
             // 
             this.priceLabel.AutoSize = true;
-            this.priceLabel.Location = new System.Drawing.Point(277, 68);
+            this.priceLabel.Location = new System.Drawing.Point(369, 84);
+            this.priceLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.priceLabel.Name = "priceLabel";
-            this.priceLabel.Size = new System.Drawing.Size(31, 13);
+            this.priceLabel.Size = new System.Drawing.Size(38, 16);
             this.priceLabel.TabIndex = 5;
             this.priceLabel.Text = "Price";
             // 
             // priceUpDown
             // 
             this.priceUpDown.DecimalPlaces = 2;
-            this.priceUpDown.Location = new System.Drawing.Point(329, 66);
+            this.priceUpDown.Location = new System.Drawing.Point(439, 81);
+            this.priceUpDown.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.priceUpDown.Maximum = new decimal(new int[] {
             100000000,
             0,
             0,
             0});
             this.priceUpDown.Name = "priceUpDown";
-            this.priceUpDown.Size = new System.Drawing.Size(120, 20);
+            this.priceUpDown.Size = new System.Drawing.Size(160, 22);
             this.priceUpDown.TabIndex = 7;
             this.priceUpDown.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.priceUpDown.ThousandsSeparator = true;
             // 
             // qtyUpDown
             // 
-            this.qtyUpDown.Location = new System.Drawing.Point(329, 92);
+            this.qtyUpDown.Location = new System.Drawing.Point(439, 113);
+            this.qtyUpDown.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.qtyUpDown.Maximum = new decimal(new int[] {
             1000000,
             0,
             0,
             0});
             this.qtyUpDown.Name = "qtyUpDown";
-            this.qtyUpDown.Size = new System.Drawing.Size(120, 20);
+            this.qtyUpDown.Size = new System.Drawing.Size(160, 22);
             this.qtyUpDown.TabIndex = 9;
             this.qtyUpDown.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.qtyUpDown.ThousandsSeparator = true;
@@ -130,18 +139,20 @@
             // qtyLabel
             // 
             this.qtyLabel.AutoSize = true;
-            this.qtyLabel.Location = new System.Drawing.Point(277, 94);
+            this.qtyLabel.Location = new System.Drawing.Point(369, 116);
+            this.qtyLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.qtyLabel.Name = "qtyLabel";
-            this.qtyLabel.Size = new System.Drawing.Size(46, 13);
+            this.qtyLabel.Size = new System.Drawing.Size(55, 16);
             this.qtyLabel.TabIndex = 8;
             this.qtyLabel.Text = "Quantity";
             // 
             // okButton
             // 
             this.okButton.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.okButton.Location = new System.Drawing.Point(277, 148);
+            this.okButton.Location = new System.Drawing.Point(369, 182);
+            this.okButton.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.okButton.Name = "okButton";
-            this.okButton.Size = new System.Drawing.Size(75, 23);
+            this.okButton.Size = new System.Drawing.Size(100, 28);
             this.okButton.TabIndex = 10;
             this.okButton.Text = "OK";
             this.okButton.UseVisualStyleBackColor = true;
@@ -150,9 +161,10 @@
             // cancelButton
             // 
             this.cancelButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.cancelButton.Location = new System.Drawing.Point(374, 148);
+            this.cancelButton.Location = new System.Drawing.Point(499, 182);
+            this.cancelButton.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.cancelButton.Name = "cancelButton";
-            this.cancelButton.Size = new System.Drawing.Size(75, 23);
+            this.cancelButton.Size = new System.Drawing.Size(100, 28);
             this.cancelButton.TabIndex = 11;
             this.cancelButton.Text = "Cancel";
             this.cancelButton.UseVisualStyleBackColor = true;
@@ -160,9 +172,10 @@
             // 
             // resetButton
             // 
-            this.resetButton.Location = new System.Drawing.Point(277, 119);
+            this.resetButton.Location = new System.Drawing.Point(369, 146);
+            this.resetButton.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.resetButton.Name = "resetButton";
-            this.resetButton.Size = new System.Drawing.Size(172, 23);
+            this.resetButton.Size = new System.Drawing.Size(229, 28);
             this.resetButton.TabIndex = 12;
             this.resetButton.Text = "Reset";
             this.resetButton.UseVisualStyleBackColor = true;
@@ -171,10 +184,10 @@
             // ProductForm
             // 
             this.AcceptButton = this.okButton;
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.cancelButton;
-            this.ClientSize = new System.Drawing.Size(461, 249);
+            this.ClientSize = new System.Drawing.Size(615, 306);
             this.Controls.Add(this.resetButton);
             this.Controls.Add(this.cancelButton);
             this.Controls.Add(this.okButton);
@@ -188,6 +201,7 @@
             this.Controls.Add(this.articleLable);
             this.Controls.Add(this.pictureBox1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "ProductForm";

@@ -28,64 +28,100 @@ namespace Amazon_test
             LoadImage(@Directory.GetCurrentDirectory()+@"\pic\" + articleBox.Text+".jpg");
         }
 
-        private string id = ProductListForm.itemID.ToString();
-        private string article;
-        private string name;
-        private decimal price;
-        private int qty;
+        private static readonly string id = ProductListForm.itemID.ToString();
+        private static string article;
+        private static string name;
+        private static decimal price;
+        private static int qty;
 
         private void LoadData()
         {
-            SqlConnection con = new SqlConnection(Properties.Settings.Default.sqlConnectionString);
+            string sqlQueryString = "SELECT * FROM Products WHERE ID =@id";
+            SqlConnection sqlConnection = new SqlConnection(Properties.Settings.Default.sqlConnectionString);
+            DataTable dataTable = new DataTable();
+
+            //Forming an SQL command with parameters
+            SqlCommand sqlCommand = new SqlCommand(sqlQueryString, sqlConnection);
+            sqlCommand.Parameters.Add("@id", SqlDbType.Int);
+            sqlCommand.Parameters["@id"].Value = id;
+            
             try
             {
-                //Establish connection with SQL server
-                con.Open();
-                string SqlSelectQuery = "SELECT * FROM Products WHERE ID =" + id;
-                SqlCommand cmd = new SqlCommand(SqlSelectQuery, con);
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                sqlConnection.Open();
+                using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
+                {
+                    //Fill datatable with SQL data                        
+                    sqlDataAdapter.Fill(dataTable);
 
-                //Fill datatable with SQL data
-                DataTable dataTable = new DataTable();
-                da.Fill(dataTable);
-                da.Dispose();
-                con.Close();
-                
-                //Pass data to varibles
-                article = dataTable.Rows[0]["Article"].ToString();
-                name = dataTable.Rows[0]["Name"].ToString();
-                price = (decimal)dataTable.Rows[0]["Price"];
-                qty = (int)dataTable.Rows[0]["Quantity"];
+                    //Pass data to varibles
+                    article = dataTable.Rows[0]["Article"].ToString();
+                    name = dataTable.Rows[0]["Name"].ToString();
+                    price = (decimal)dataTable.Rows[0]["Price"];
+                    qty = (int)dataTable.Rows[0]["Quantity"];
 
-                SetBoxes(); //Setting values to textboxes
+                    SetBoxes(); //Setting values to textboxes                        
+                }
             }
-
             catch (Exception ex)
             {
                 MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                this.Close();
+            }
+            finally
+            {
+                sqlConnection.Close();
+                sqlCommand.Dispose();
+                dataTable.Dispose();
             }
         }
 
         private void UploadData()
         {
-            SqlConnection con = new SqlConnection(Properties.Settings.Default.sqlConnectionString);
+            Object[] parametersObjects = new Object[4] //Collection of the data, which will be sent to server DB
+                {
+                    articleBox.Text,
+                    nameBox.Text,
+                    (double)priceUpDown.Value,
+                    (int)qtyUpDown.Value
+                };
+            string sqlQueryString = "UPDATE Products SET Article=@article, Name=@name, Price=@price, Quantity=@qty" +
+                    " WHERE ID =@id";
+
+            SqlConnection sqlConnection = new SqlConnection(Properties.Settings.Default.sqlConnectionString);
+
+            //Forming an SQL command with parameters
+            SqlCommand sqlCommand = new SqlCommand(sqlQueryString, sqlConnection);
+            sqlCommand.Parameters.Add("@article", SqlDbType.VarChar);
+            sqlCommand.Parameters.Add("@name", SqlDbType.VarChar);
+            sqlCommand.Parameters.Add("@price", SqlDbType.Float);
+            sqlCommand.Parameters.Add("@qty", SqlDbType.Int);
+            sqlCommand.Parameters.Add("@id", SqlDbType.Int);
+            sqlCommand.Parameters["@article"].Value = parametersObjects[0];
+            sqlCommand.Parameters["@name"].Value = parametersObjects[1];
+            sqlCommand.Parameters["@price"].Value = parametersObjects[2];
+            sqlCommand.Parameters["@qty"].Value = parametersObjects[3];
+            sqlCommand.Parameters["@id"].Value = id;
+
             try
             {
-                con.Open();
-                string SqlSelectQuery = "UPDATE Products SET Article='"+
-                    articleBox.Text+"', Name='"+
-                    nameBox.Text+"', Price="+
-                    ((double)priceUpDown.Value).ToString(System.Globalization.CultureInfo.InvariantCulture) +", Quantity="+
-                    qtyUpDown.Value.ToString() + " WHERE ID =" + id;
-                SqlCommand cmd = new SqlCommand(SqlSelectQuery, con);
-                cmd.ExecuteNonQuery();
-                con.Close();
+                sqlConnection.Open();
+                if (sqlCommand.ExecuteNonQuery() > 0)
+                {
+                    MessageBox.Show("The product has been successfully updated.", "Successful Update", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                else
+                {
+                    MessageBox.Show("The product has NOT been successfully updated.", "Not successful Operation", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
             }
-
             catch (Exception ex)
             {
                 MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                this.Close();
+            }
+            finally
+            {
+                sqlConnection.Close();
+                sqlCommand.Dispose();
             }
         }
 
@@ -99,7 +135,7 @@ namespace Amazon_test
             catch
             {
                 //If file not found, load NA file
-                pictureBox1.Image = Image.FromFile(@Directory.GetCurrentDirectory() + @"\pic\NA.jpg");
+                pictureBox1.Image = pictureBox1.ErrorImage;
             }
         }
 
